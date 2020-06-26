@@ -1,18 +1,30 @@
 <template>
-  <div class="image-search">
-    <h1>Image Search</h1>
-    <input v-model="query" @keyup="search" />
-    <ImageList :images="images"/>
+  <div class="image-search m-8">
+    <h1 class="text-left">Andres Betin - Image Search</h1>
+    <input
+      class="appearance-none bg-gray-200 border-none w-full h-10 text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none mb-4"
+      v-model="query"
+      @keyup="search"
+      placeholder="Ingresa texto para buscar imagenes"
+    />
+    <circle-4 v-if="loading" class="align-middle m-auto"></circle-4>
+    <div v-if="images.length === 0">
+      <h1 class="text-left">No hay imagenes disponibles</h1>
+    </div>
+    <div v-else>
+      <ImageList :images="images" class="align-middle" />
+    </div>
   </div>
 </template>
 
 <script>
 import ImageList from "./ImageList.vue";
-// import ImageSearchService from "@/services/ImageSearchService";
+import { Circle4 } from "vue-loading-spinner";
+import ImageSearchService from "@/services/ImageSearchService";
 
-// let imageSearchService = new ImageSearchService();
+let imageSearchService = new ImageSearchService();
 
-let mockImages = [
+let mockData = [
     {
       "id": "i9QJqSIr4l4",
       "created_at": "2020-06-15T17:15:30-04:00",
@@ -1782,7 +1794,7 @@ let mockImages = [
         }
       ]
     }
-  ];
+  ]
 
 export default {
   name: "ImageSearch",
@@ -1790,24 +1802,32 @@ export default {
     return {
       query: "",
       page: 1,
-      perPage: 10,
-      images: mockImages // []
+      perPage: 20,
+      images: [],
+      loading: false
     };
   },
   components: {
-    ImageList
+    ImageList,
+    Circle4
   },
   methods: {
     search: function() {
-      console.log("query", this.query);
-      /* imageSearchService.getImages(this.query, this.page, this.perPage)
-      .then(response => {
-        this.images = response.results;
-      }); */
+      console.log("event");
+      this.loading = true;
+      imageSearchService
+        .getImages(this.query, this.page, this.perPage)
+        .then(response => {
+          this.images = response.results;
+          this.loading = false;
+        })
+        .catch(() => {
+          this.images = mockData;
+          this.loading = false;
+        });
     }
   }
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
